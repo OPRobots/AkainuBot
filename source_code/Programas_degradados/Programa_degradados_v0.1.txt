@@ -1,0 +1,135 @@
+//============================
+     //variables pines//
+//============================
+
+int sensor[7] = {A0,A1,A2,A3,A4,A5,A6,A7};
+
+//============================
+  //variables calibración//
+//============================
+
+int valores[7] = {0,0,0,0,0,0,0};
+int valores_min[7] = {1023,1023,1023,1023,1023,1023,1023};
+int valores_max[7] = {0,0,0,0,0,0,0};
+float media = 0;
+float media_min = 1000;
+float media_max = 0;
+
+bool calibracion1_ok = false;
+bool calibracion2_ok = false;
+
+//============================
+      //variables PID//
+//============================
+
+int posicion = 0;	//posicion del robot sobre la pista (de -1000 a 1000)
+int ideal = 0;		//valor ideal del PID (de -1000 a 1000)
+
+
+float millis_anterior=0;
+
+
+
+
+
+void setup{
+
+}
+
+
+
+
+void loop{
+
+
+
+//============================
+	//calibración//
+//============================
+
+if (calibracion1_ok == false){
+
+
+digitalWrite(13,HIGH);
+
+
+do{
+
+for(i=0;i<7;i++){
+valores[i] = analogRead(sensor[i]);
+}
+
+
+for(i=0;i<7;i++){
+if(valores[i]) < valores_min[i]){
+valores_min[i] = valores[i];
+}else if(valores[i] > valores_max[i]){
+valores_max[i] = valores [i];
+}
+}
+
+}while(millis == millis_anterior%5000);
+
+
+calibracion1_ok == true;
+digitalWrite(13,LOW);
+delay(700);
+}
+
+
+
+
+
+
+if (calibracion1_ok == true && calibracion2_ok == false){
+
+digitalWwrite(13,HIGH);
+
+
+
+do{
+
+for(i=0;i<7;i++){
+media = media + map(analogRead(sensor[i]), valores_min[i], valores_max[i], 0, 1000);
+}
+media = media/7;
+
+if(media < media_min){
+media_min = media;
+}else if(media > media_max){
+media_max = media;
+}
+
+
+}while(millis == millis_anterior%5000);
+
+
+calibracion2_ok = true;
+digitalWrite(13,LOW);
+}
+
+
+
+//============================
+   //Calculo posicion robot//
+//============================
+
+for(i=0;i<7;i++){
+valores[i] = maps(analogRead(sensor[i]), valores_min[i], valores_max[i], 0, 1000);
+}
+
+for(i=0;i<7;i++){
+media = media + valores[i];
+}
+posicion = maps((media/7), media_min, media_max, 0, 1000);
+
+if(valores[7] > valores[1]){
+posicion = posicion*-1;
+
+}
+posicion = posicion+ideal
+
+
+
+
+}
